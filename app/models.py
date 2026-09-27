@@ -4,6 +4,7 @@ from typing import Literal
 from pydantic import BaseModel,Field
 
 class TestCase(BaseModel):
+    __test__ = False  # tell pytest this is not a test class
     title: str
     steps: list[str]
     expected_result: str
@@ -11,6 +12,7 @@ class TestCase(BaseModel):
 
 
 class TestSuite(BaseModel):
+    __test__ = False  # tell pytest this is not a test class
     test_cases: list[TestCase]
 
 
