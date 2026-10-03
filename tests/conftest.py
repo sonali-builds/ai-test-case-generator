@@ -3,10 +3,13 @@ import pytest
 
 from app.generator import FakeGenerator, get_generator
 from app.main import app
+from app.rag import DocumentStore, FakeEmbedder, get_store
 
 
 @pytest.fixture(autouse=True)
 def use_fake_generator():
     app.dependency_overrides[get_generator] = FakeGenerator
+    store = DocumentStore(FakeEmbedder())
+    app.dependency_overrides[get_store] = lambda: store
     yield
     app.dependency_overrides.clear()

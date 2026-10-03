@@ -1,0 +1,21 @@
+# Login & Account Security Requirements (v1.2)
+
+REQ-1 Password rules. A password must be 8 to 20 characters long and contain at least one digit and one uppercase letter. Passwords that fail these rules are rejected with the message "Password does not meet requirements".
+
+REQ-2 Account lockout. After 5 consecutive failed login attempts, the account is locked for 15 minutes. A successful login resets the failed-attempt counter. Locked users see "Account temporarily locked".
+
+REQ-3 Session timeout. A user session expires after 30 minutes of inactivity. On expiry the user is redirected to the login page and any unsaved form data is discarded.
+
+REQ-4 Password reset. Users can request a reset link by email. The link is valid for 60 minutes and can be used only once. Requesting a new link invalidates any previous link.
+
+REQ-5 Two-factor authentication. Users with 2FA enabled must enter a 6-digit code after their password. Three wrong codes end the login attempt and count as one failed login toward lockout (REQ-2).
+
+REQ-6 Remember me. If "Remember me" is checked at login, the session lasts 14 days instead of 30 minutes, but only on the same device and browser. Logging out ends the remembered session immediately.
+
+REQ-7 Concurrent sessions. A user may have at most 3 active sessions. Logging in on a 4th device ends the oldest session, and that device shows "You were signed out because you signed in elsewhere".
+
+REQ-8 Username rules. Usernames are case-insensitive, 3 to 30 characters, and may contain letters, digits, dots and underscores only. They cannot start or end with a dot.
+
+REQ-9 Audit logging. Every login attempt (successful or failed), lockout, password reset and 2FA failure is written to the audit log with timestamp, username and IP address. Passwords and 2FA codes are never logged.
+
+REQ-10 Error messages. For a wrong username or wrong password, the system shows the same generic message "Invalid username or password", so attackers cannot tell which one was wrong.
