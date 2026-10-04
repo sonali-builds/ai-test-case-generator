@@ -9,6 +9,8 @@ class TestCase(BaseModel):
     steps: list[str]
     expected_result: str
     priority: Literal["High","Medium","Low"]
+    requirement_ids: list[str]  # e.g [REQ-2]: which requirement this test verifies
+    sources: list[str]          # e.g ["C1"]: which document chunk it came from
 
 
 class TestSuite(BaseModel):
@@ -44,3 +46,14 @@ class RetrievedChunk(BaseModel):
     id: str
     text: str
     score: float
+
+
+class RagGenerateRequest(BaseModel):
+    focus: str = Field(min_length=1, max_length=500)   # e.g. "account lockout"
+    max_cases: int = Field(default=3, ge=1, le=10)
+    top_k: int = Field(default=3, ge=1, le=10)
+
+
+class RagGenerateResponse(BaseModel):
+    test_cases: list[TestCase]
+    retrieved: list[RetrievedChunk] # shown so users can check where each test came from

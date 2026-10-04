@@ -4,8 +4,8 @@ from fastapi import FastAPI, Depends, HTTPException
 load_dotenv() # reads OPENAI_API_KEY from the .env file, if present
 
 from .generator import GenerationError, Generator , get_generator  # noqa: E402
-from .models import (DocumentIn, DocumentOut, GenerateRequest, RetrievedChunk, 
-                     SearchRequest, TestSuite)  # noqa: E402
+from .models import (DocumentIn, DocumentOut, GenerateRequest, RagGenerateRequest,
+                     RagGenerateResponse, RetrievedChunk, SearchRequest, TestSuite)  # noqa: E402
 from .rag import DocumentStore, get_store  #noqa: E402
 
 # Create the web application
@@ -42,3 +42,18 @@ def search_document(doc_id: str, req: SearchRequest, store: DocumentStore = Depe
     if not store.has(doc_id):
         raise HTTPException(status_code=404, detail="Document not found")
     return store.search(doc_id, req.query, req.top_k)
+
+
+# Generate test cases grounded in a document (RAG)
+@app.post("/documents/{doc_id}/generate", response_model=RagGenerateResponse)
+def generate_from_document(doc_id: str, req: RagGenerateRequest,
+                           store: DocumentStore = Depends(get_store),
+                           gen: Generator = Depends(get_generator)):
+    if not store.has(doc_id):
+        raise HTTPException(status_code=404, detail="Document not found")
+    retrieved = store.search(doc_id, req.focus, req.top_k)
+    try:
+        suite = gen.generate(req.focus, req.max_cases, context=retrieved)
+    except GenerationError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+    return RagGenerateResponse(test_cases=suite.test_cases, retrieved=retrieved)
