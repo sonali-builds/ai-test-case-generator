@@ -71,6 +71,7 @@ class OpenAIGenerator:
             from openai import OpenAI
             client = OpenAI(max_retries=3, timeout=60)
         self.client = client
+        self.last_usage = None  #token counts of the latest call ( used by evals)
 
 
     def generate(self, requirement: str, max_cases: int = 3,
@@ -81,6 +82,7 @@ class OpenAIGenerator:
             input=build_input(requirement, max_cases, context),
             text_format=TestSuite,
         )
+        self.last_usage = getattr(resp, "usage", None)
         suite = resp.output_parsed
         if suite is None:
             raise GenerationError("The AI returned no usable test cases.")
